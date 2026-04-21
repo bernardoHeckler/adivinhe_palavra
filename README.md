@@ -1,85 +1,90 @@
-# WebSocket Chat (Tornado Assíncrono)
+# Adivinhe a Palavra com Emojis
 
-A mesma base didática do chat interativo, mas agora utilizando o protocolo **WebSocket** em conjunto com o framework de alta performance **Tornado**! 
+Jogo multiplayer de adivinhação em tempo real inspirado em dinâmicas como Gartic, mas com um formato diferente: no lugar de desenho, a rodada mostra uma combinação de emojis que representa uma palavra, verbo, filme, série ou conceito.
 
-Ele introduz o modelo de **Duplex Completo (Assíncrono)**; o que significa que diferentemente do modelo sequencial travado, **ninguém precisa aguardar pela resposta do outro**. O recebimento de rede e o console local rodam paralelamente sem bloqueios.
-Por ser um sistema em tempo real puro, o servidor não armazena mensagens: elas são apenas transmitidas entre os clientes conectados naquele momento.
-Além disso, o sistema agora suporta **múltiplas salas de chat simultâneas**, permitindo que diferentes grupos de usuários se comuniquem de forma isolada dentro da mesma aplicação.
+Os jogadores entram em uma sala, enviam palpites pelo chat e disputam quem descobre a resposta primeiro. Quando um palpite chega perto, o sistema avisa. Quem acerta ganha pontos e uma nova rodada começa automaticamente.
 
-## 📌 Arquitetura
+## Stack
 
-O chat agora é gerido num formato orientado a eventos no clássico Loop (`IOLoop`):
-- O **Tornado Web** (`tornado.web.Application`) instanciou um *Handler* persistente (`/chat`) na especificação WebSocket.
-- O Terminal do servidor e do cliente rodam uma *coroutine* poderosa (`asyncio.to_thread`) que lê o teclado simultaneamente à placa de rede.
-- O payload de protocolo agora codifica os bytes numa `String` limpa em memória ao invés de bytes transientes.
-- O servidor mantém um gerenciamento em memória das conexões organizadas por sala (`dict[sala] = conexões`), garantindo o isolamento das mensagens.
+- Python
+- Tornado
+- WebSocket
+- JavaScript
+- HTML/CSS
 
-## 📂 Estrutura de Arquivos
+## Como funciona
 
-* **`servidor.py`**: O arquivo de backend na raiz que Roda o servidor WebSocket Tornado.
-* **`clientes/console.py`**: O cliente Python Terminal em si usando `websocket_connect()`.
-* **`clientes/web/`**: A bela Interface Gráfica Glassmorphism provida pelo próprio Tornado no Root URL.
-* **`main.py`**: Arquivo responsável por inicializar a aplicação Tornado e configurar as rotas.
-* **`protocolo.py`**: Define a estrutura das mensagens e sua serialização/desserialização.
+- Cada sala é isolada e mantém seu próprio estado de jogo
+- O servidor escolhe um desafio com emojis e categoria
+- Os jogadores enviam palpites em tempo real
+- O backend detecta:
+  - acerto exato
+  - acerto ignorando artigos e acentos
+  - palpite "quase certo"
+- O placar é atualizado ao vivo
+- Se ninguém acertar, o tempo acaba e a resposta é revelada
 
-## 🚀 Como Executar
+## Estrutura principal
 
-### 1. Instale o Tornado
-Se ainda não possuir, instale o único requerimento mapeado no ecossistema atual:
+- **`main.py`**: inicializa o Tornado e publica a interface web
+- **`servidor.py`**: controla salas, rodadas, pontuação, dicas e WebSocket
+- **`protocolo.py`**: define mensagens, serialização e verificação de palpites
+- **`clientes/console.py`**: cliente simples de terminal para testes
+- **`clientes/web/`**: interface web do jogo
+
+## Executando
+
+Instale as dependências:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Inicie o Servidor e o Client
-Com a nova arquitetura de pacotes e a presença do `__init__.py`, executamos a partir da raiz do repositório garantindo que as bibliotecas cruzem de forma correta (`-m`).
+Inicie o servidor:
 
-**Terminal 1:**
 ```bash
 python main.py
 ```
-**Terminal 2:** Abra o navegador em `http://localhost:8080/` OU execute a CLI local:
-```bash
-python -m clientes.console
+
+Abra no navegador:
+
+```text
+http://localhost:8080/
 ```
 
-### 3. Após abrir o navegador
-Você pode acessar salas diferentes diretamente pela URL:
+Para entrar direto em uma sala:
 
-`http://localhost:8080/?sala=abc`
-
-Caso nenhum parâmetro seja informado, o sistema conecta automaticamente na sala `default`.
-
-## 💬 Funcionamento das Salas
-
-Cada conexão WebSocket é associada a uma sala através de um parâmetro de query (`?sala=nome`).
-
-- Usuários na mesma sala recebem mensagens entre si
-- Usuários em salas diferentes são totalmente isolados
-- As salas são criadas dinamicamente conforme a conexão dos clientes
-
-> ⚠️ O endpoint `/chat/ws` é exclusivo para WebSocket e não deve ser acessado diretamente pelo navegador
-
-## 🧪 Validando a Qualidade (Testes)
-
-O framework de testes está suportado via `pytest` com Mocks de terminal de rede. O sistema cobre todos os eventos base (Conexão, Decodificação e Mensageria Assíncrona).
-
-Para executa-los localmente:
-```bash
-pip install pytest pytest-cov pytest-asyncio
-pytest tests/ --cov=backend --cov=clientes.console
+```text
+http://localhost:8080/?sala=amigos
 ```
 
-## ⚠️ Observações
+## Fluxo do jogo
 
-- As salas são mantidas em memória (não persistem após reinício do servidor)
-- As mensagens não são armazenadas (não existe histórico de chat)
-- O sistema não possui autenticação (qualquer usuário pode entrar em qualquer sala)
-- O chat funciona apenas em tempo real (as mensagens existem apenas durante a conexão ativa)
+1. O jogador informa nome e sala.
+2. O servidor conecta o jogador ao WebSocket da sala.
+3. A rodada mostra os emojis e a categoria.
+4. Os palpites são enviados pelo próprio chat.
+5. Ao acertar, o vencedor recebe pontos e a resposta é exibida.
+6. Alguns segundos depois, começa a próxima rodada.
 
-*A GitHub Action implementada atestará o Deploy Continuamente após cada envio `Push` pro main.*
+## Regras atuais
 
-## 🚧 Melhorias Futuras
+- Tempo por rodada: `60s`
+- Pontuação por acerto: `100`
+- Dicas automáticas durante a rodada
+- Salas em memória, sem persistência
+- Sem autenticação
 
-- Persistência de mensagens (histórico de chat)
-- Autenticação de usuários
-- Escalabilidade com Redis
+## Observações
+
+- O projeto depende de `tornado` para rodar o servidor
+- Para testar com `pytest`, instale também as dependências de teste do seu ambiente
+- As salas e pontuações são reiniciadas quando o servidor é encerrado
+
+## Próximos passos sugeridos
+
+- adicionar botão de iniciar/reiniciar rodada manualmente
+- criar modo host da sala
+- persistir ranking entre partidas
+- aumentar o banco de desafios
+- separar chat social de campo exclusivo de palpite

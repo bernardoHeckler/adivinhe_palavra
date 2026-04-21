@@ -3,32 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Premium Chat</title>
+    <title>Adivinhe com Emojis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="chat-container">
-        <header class="chat-header">
-            <div class="status-indicator" id="status-indicator"></div>
-            <h1>Tornado Async Chat</h1>
-            <span id="status-text">Conectando...</span>
-        </header>
-        
-        <div class="chat-messages" id="chat-messages">
-            <!-- As mensagens aparecerão aqui dinamicamente -->
-        </div>
+    <div class="page-shell">
+        <section class="hero-card">
+            <div class="hero-copy">
+                <p class="eyebrow">Multiplayer em tempo real</p>
+                <h1>Adivinhe a palavra por emojis.</h1>
+                <p class="hero-text">
+                    Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera.
+                    Se você chegar perto, o jogo avisa.
+                </p>
+            </div>
 
-        <form class="chat-input-area" id="chat-form">
-            <input type="text" id="message-input" placeholder="Escreva algo brilhante..." autocomplete="off">
-            <button type="submit" id="send-btn">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z" fill="currentColor"/>
-                </svg>
-            </button>
-        </form>
+            <form id="login-form" class="login-card">
+                <label>
+                    <span>Seu nome</span>
+                    <input id="username-input" name="usuario" maxlength="24" placeholder="Ex.: Bernardo" required>
+                </label>
+                <label>
+                    <span>Sala</span>
+                    <input id="room-input" name="sala" maxlength="24" placeholder="Ex.: amigos">
+                </label>
+                <button type="submit">Entrar na rodada</button>
+                <p class="login-hint">Se a URL tiver `?sala=nome`, ela já entra preenchida.</p>
+            </form>
+        </section>
+
+        <main id="game-layout" class="game-layout hidden">
+            <section class="stage-card">
+                <div class="stage-topbar">
+                    <div>
+                        <p class="eyebrow">Sala <span id="room-label">default</span></p>
+                        <h2 id="round-label">Rodada 0</h2>
+                    </div>
+                    <div class="timer-badge" id="timer-badge">
+                        <span>Tempo</span>
+                        <strong id="timer-value">--</strong>
+                    </div>
+                </div>
+
+                <div class="emoji-stage">
+                    <p class="category-pill" id="category-label">Aguardando categoria</p>
+                    <div class="emoji-display" id="emoji-display">⌛</div>
+                    <p class="stage-subtitle" id="stage-subtitle">Esperando o próximo desafio começar...</p>
+                </div>
+
+                <div id="feedback-banner" class="feedback-banner hidden"></div>
+
+                <div class="guess-box">
+                    <form id="guess-form" class="guess-form">
+                        <input id="guess-input" autocomplete="off" placeholder="Digite seu palpite ou converse com a sala">
+                        <button type="submit">Enviar</button>
+                    </form>
+                </div>
+            </section>
+
+            <aside class="sidebar">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Placar</h3>
+                        <span id="player-count">0 jogadores</span>
+                    </div>
+                    <div id="scoreboard" class="scoreboard-list"></div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h3>Chat da sala</h3>
+                        <span id="connection-status" class="status-pill offline">Conectando</span>
+                    </div>
+                    <div id="messages" class="messages"></div>
+                </section>
+            </aside>
+        </main>
     </div>
-    
+
     <script type="module" src="app.js"></script>
 </body>
 </html>

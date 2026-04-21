@@ -1,24 +1,43 @@
-import { connect, sendMessage } from './websocket.js';
-import { addMessage } from './ui.js';
+import { preencherSalaInicial, abrirJogo, obterElementos, limparCampo } from "./ui.js";
+import { conectar, enviarPalpite } from "./websocket.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatForm = document.getElementById("chat-form");
-    const messageInput = document.getElementById("message-input");
+document.addEventListener("DOMContentLoaded", () => {
+    preencherSalaInicial();
+    const elements = obterElementos();
 
-    chatForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const texto = messageInput.value.trim();
+    let sessaoAtual = null;
 
-        if (texto) {
-            const payload = sendMessage("Web Client", texto);
-            if (payload) {
-                addMessage(payload.remetente, payload.conteudo, "cliente");
-                messageInput.value = "";
-            }
+    elements.loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const usuario = elements.usernameInput.value.trim();
+        const sala = elements.roomInput.value.trim() || "default";
+
+        if (!usuario) {
+            elements.usernameInput.focus();
+            return;
+        }
+
+        try {
+            sessaoAtual = { usuario, sala };
+            await conectar(sessaoAtual);
+            abrirJogo(sessaoAtual);
+            const params = new URLSearchParams(window.location.search);
+            params.set("sala", sala);
+            window.history.replaceState({}, "", `?${params.toString()}`);
+        } catch (error) {
+            console.error("Não foi possível conectar", error);
+            sessaoAtual = null;
         }
     });
 
-    // Inicia a conexão
-    connect();
-    console.log("Sala atual:", new URLSearchParams(window.location.search).get("sala"));
+    elements.guessForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const texto = elements.guessInput.value.trim();
+        if (!texto || !sessaoAtual) {
+            return;
+        }
+        if (enviarPalpite(texto)) {
+            limparCampo();
+        }
+    });
 });
