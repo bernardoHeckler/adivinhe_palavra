@@ -1,0 +1,194 @@
+:root {
+    --bg-gradient: linear-gradient(135deg, #11101d, #1c1b29, #2d2b42);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --primary: #00f2fe;
+    --text-main: #ffffff;
+    --text-muted: #8b8a9e;
+    --msg-client: rgba(0, 242, 254, 0.15);
+    --msg-server: rgba(255, 255, 255, 0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-main);
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 650px;
+    height: 85vh;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 24px 30px;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff4757;
+    box-shadow: 0 0 12px #ff4757;
+    transition: all 0.4s ease;
+}
+
+.status-indicator.connected {
+    background: #2ed573;
+    box-shadow: 0 0 12px #2ed573;
+}
+
+.chat-header h1 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    flex: 1;
+}
+
+#status-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.message {
+    max-width: 80%;
+    padding: 16px 20px;
+    border-radius: 20px;
+    animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+    transform: translateY(15px);
+    position: relative;
+    word-break: break-word;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+@keyframes bounceIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message.cliente {
+    align-self: flex-end;
+    background: var(--msg-client);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    border-bottom-right-radius: 4px;
+}
+
+.message.servidor {
+    align-self: flex-start;
+    background: var(--msg-server);
+    border: 1px solid var(--glass-border);
+    border-bottom-left-radius: 4px;
+}
+
+.message .sender {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.message.cliente .sender {
+    color: var(--primary);
+}
+
+.chat-input-area {
+    padding: 24px 30px;
+    background: rgba(0, 0, 0, 0.15);
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 16px;
+}
+
+#message-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    padding: 16px 24px;
+    border-radius: 30px;
+    color: var(--text-main);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#message-input:focus {
+    border-color: var(--primary);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+}
+
+#send-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    color: #11101d;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+#send-btn svg {
+    width: 20px;
+    height: 20px;
+    transform: translateX(2px);
+}
+
+#send-btn:hover {
+    transform: scale(1.08) rotate(5deg);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+}
+
+#send-btn:active {
+    transform: scale(0.95);
+}
