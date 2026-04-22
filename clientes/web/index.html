@@ -1,45 +1,53 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adivinhe com Emojis</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2">
 </head>
+
 <body>
     <div class="page-shell">
         <section class="hero-card">
             <div class="hero-copy">
                 <p class="eyebrow">Multiplayer em tempo real</p>
-                <h1>Adivinhe a palavra por emojis.</h1>
+                <h1>Adivinhe a palavra por emojis</h1>
                 <p class="hero-text">
-                    Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera.
-                    Se você chegar perto, o jogo avisa.
+                    Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera
                 </p>
             </div>
 
             <form id="login-form" class="login-card">
                 <label>
                     <span>Seu nome</span>
-                    <input id="username-input" name="usuario" maxlength="24" placeholder="Ex.: Bernardo" required>
+                    <input id="username-input" name="usuario" maxlength="24" placeholder="Ex: Bernardo" required>
                 </label>
                 <label>
                     <span>Sala</span>
-                    <input id="room-input" name="sala" maxlength="24" placeholder="Ex.: amigos">
+                    <input id="room-input" name="sala" maxlength="24" placeholder="Ex: amigos">
                 </label>
                 <button type="submit">Entrar na rodada</button>
-                <p class="login-hint">Se a URL tiver `?sala=nome`, ela já entra preenchida.</p>
+                <p class="login-hint">Crie uma sala e convide seus amigos</p>
             </form>
+
+            <div id="hero-qrcode-container" class="hero-qrcode-container hidden">
+                <h3 class="hero-qrcode-title">Convide seus amigos</h3>
+                <div id="hero-qrcode" class="hero-qrcode-box"></div>
+            </div>
         </section>
 
         <main id="game-layout" class="game-layout hidden">
             <section class="stage-card">
                 <div class="stage-topbar">
                     <div>
-                        <p class="eyebrow">Sala <span id="room-label">default</span></p>
+                        <p class="eyebrow">Sala <span id="room-label"></span></p>
                         <h2 id="round-label">Rodada 0</h2>
                     </div>
                     <div class="timer-badge" id="timer-badge">
@@ -58,7 +66,8 @@
 
                 <div class="guess-box">
                     <form id="guess-form" class="guess-form">
-                        <input id="guess-input" autocomplete="off" placeholder="Digite seu palpite ou converse com a sala">
+                        <input id="guess-input" autocomplete="off"
+                            placeholder="Digite seu palpite ou converse com a sala">
                         <button type="submit">Enviar</button>
                     </form>
                 </div>
@@ -84,6 +93,8 @@
         </main>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module" src="app.js?v=2"></script>
 </body>
+
 </html>

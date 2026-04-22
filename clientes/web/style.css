@@ -81,6 +81,7 @@ body {
     font-size: clamp(2.2rem, 6vw, 4.1rem);
     line-height: 0.95;
     max-width: 10ch;
+    margin: 0;
 }
 
 .hero-text {
@@ -95,6 +96,32 @@ body {
     display: grid;
     gap: 16px;
     background: var(--card-strong);
+}
+
+.hero-qrcode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 22px;
+}
+
+.hero-qrcode-title {
+    font-family: "Space Grotesk", sans-serif;
+    margin: 0;
+    color: #fdba74;
+}
+
+.hero-qrcode-box {
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
 }
 
 .login-card label,
@@ -343,12 +370,23 @@ button {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
 }
 
 @media (max-width: 920px) {
+
     .hero-card,
     .game-layout {
         grid-template-columns: 1fr;

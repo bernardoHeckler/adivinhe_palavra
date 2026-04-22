@@ -2,6 +2,7 @@ import asyncio
 import json
 import random
 import time
+import socket
 from logging import Logger
 
 import tornado.websocket
@@ -25,6 +26,17 @@ from protocolo import (
 )
 
 log_servidor: Logger = obter_logger("Servidor")
+
+def obter_ip_local() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 TEMPO_RODADA = 60
 TEMPO_PROXIMA_RODADA = 4
@@ -288,6 +300,7 @@ class SalaJogo:
                 rodada=self.rodada_numero,
                 alvo_vitoria=PONTOS_VITORIA_PARTIDA,
                 partida_encerrada=self.partida_encerrada,
+                ip_servidor=obter_ip_local(),
             ),
         )
         if self.rodada_atual:

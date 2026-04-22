@@ -17,6 +17,8 @@ const elements = {
     messages: document.getElementById("messages"),
     playerCount: document.getElementById("player-count"),
     connectionStatus: document.getElementById("connection-status"),
+    heroQrcode: document.getElementById("hero-qrcode"),
+    heroQrcodeContainer: document.getElementById("hero-qrcode-container"),
 };
 
 function escapeHtml(texto) {
@@ -52,6 +54,31 @@ export function atualizarEstadoInicial(estado) {
     if (estado.partida_encerrada) {
         mostrarFeedback("Partida encerrada. A próxima começa em instantes.", "success");
     }
+    if (estado.ip_servidor && estado.sala) {
+        renderizarQRCode(estado.ip_servidor, estado.sala);
+    }
+}
+
+let currentQRCode = null;
+
+export function renderizarQRCode(ip_servidor, sala) {
+    if (!elements.heroQrcode || !elements.heroQrcodeContainer) return;
+    
+    elements.heroQrcode.innerHTML = "";
+    elements.heroQrcodeContainer.classList.remove("hidden");
+    
+    // Constrói a URL usando o IP fornecido pelo servidor e a porta atual do navegador
+    const porta = window.location.port ? `:${window.location.port}` : "";
+    const url = `http://${ip_servidor}${porta}/?sala=${encodeURIComponent(sala)}`;
+    
+    currentQRCode = new QRCode(elements.heroQrcode, {
+        text: url,
+        width: 100,
+        height: 100,
+        colorDark : "#0f172a",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.L
+    });
 }
 
 export function iniciarRodada({ rodada, emojis, categoria, tempo }) {
