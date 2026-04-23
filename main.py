@@ -17,7 +17,7 @@ class IpHandler(RequestHandler):
 
 def make_app() -> Application:
     dir_atual = os.path.dirname(os.path.abspath(__file__))
-    dir_web = os.path.join(dir_atual, "clientes", "web")
+    dir_web = os.path.join(dir_atual, "clientes", "web", "dist")
     return Application(
         [
             (r"/api/ip", IpHandler),
