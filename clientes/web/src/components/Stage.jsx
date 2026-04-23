@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Chat } from './Chat';
 
 export function Stage({ 
     room, 
@@ -9,7 +10,9 @@ export function Stage({
     subtitle, 
     feedback, 
     shakeGuess, 
-    onSendGuess 
+    onSendGuess,
+    messages,
+    revealedAnswer
 }) {
     const [guess, setGuess] = useState("");
 
@@ -36,8 +39,12 @@ export function Stage({
 
             <div className="emoji-stage">
                 <p className="category-pill">{category}</p>
-                <div className="emoji-display">{emojis}</div>
-                <p className="stage-subtitle">{subtitle}</p>
+                {revealedAnswer ? (
+                    <div className="emoji-display answer-reveal">{revealedAnswer}</div>
+                ) : (
+                    <div className="emoji-display">{emojis}</div>
+                )}
+                <p className="stage-subtitle">{revealedAnswer ? "A resposta era essa!" : subtitle}</p>
             </div>
 
             <div className={`feedback-banner ${feedback ? feedback.type : "hidden"}`}>
@@ -55,6 +62,8 @@ export function Stage({
                     <button type="submit">Enviar</button>
                 </form>
             </div>
+
+            <Chat messages={messages} />
         </section>
     );
 }

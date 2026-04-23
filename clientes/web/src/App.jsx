@@ -4,7 +4,7 @@ import { GameScreen } from './components/GameScreen';
 import { useGameSocket } from './hooks/useGameSocket';
 
 export default function App() {
-    const { gameState, connect, sendGuess } = useGameSocket();
+    const { gameState, connect, sendGuess, sendReady } = useGameSocket();
     const [inGame, setInGame] = useState(false);
 
     const handleConnect = async (room, username) => {
@@ -21,7 +21,7 @@ export default function App() {
             {!inGame ? (
                 <LoginScreen onConnect={handleConnect} />
             ) : (
-                <GameScreen gameState={gameState} sendGuess={sendGuess} />
+                <GameScreen gameState={gameState} sendGuess={sendGuess} sendReady={sendReady} />
             )}
         </div>
     );

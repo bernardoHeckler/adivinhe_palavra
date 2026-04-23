@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export function Chat({ messages, status, connected }) {
+export function Chat({ messages }) {
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -11,26 +11,18 @@ export function Chat({ messages, status, connected }) {
         scrollToBottom();
     }, [messages]);
 
-    const statusClass = connected ? "online" : "offline";
-
     return (
-        <section className="panel">
-            <div className="panel-header">
-                <h3>Chat da sala</h3>
-                <span className={`status-pill ${statusClass}`}>{status}</span>
-            </div>
-            <div className="messages">
+        <div className="chat-minimal">
+            <div className="messages minimal-messages">
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`message ${msg.type}`}>
-                        <div className="meta">
-                            <strong>{msg.author}</strong>
-                            <span>{msg.time}</span>
-                        </div>
-                        <p>{msg.text}</p>
+                    <div key={idx} className={`message-minimal ${msg.type}`}>
+                        <span className="time-meta">[{msg.time}]</span>{' '}
+                        <strong>{msg.author}: </strong>
+                        <span>{msg.text}</span>
                     </div>
                 ))}
                 <div ref={messagesEndRef} />
             </div>
-        </section>
+        </div>
     );
 }

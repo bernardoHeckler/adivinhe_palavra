@@ -17,6 +17,7 @@ export function useGameSocket() {
         feedback: null,
         shakeGuess: false,
         ipServidor: "",
+        revealedAnswer: null,
     });
 
     const [ws, setWs] = useState(null);
@@ -76,6 +77,8 @@ export function useGameSocket() {
             case "round_start":
                 clearFeedback();
                 updateState({
+                    matchResult: null,
+                    revealedAnswer: null,
                     roundNumber: data.rodada,
                     category: data.categoria,
                     emojis: data.emojis,
@@ -86,20 +89,39 @@ export function useGameSocket() {
                 break;
             case "round_end":
                 if (data.motivo === "acerto") {
-                    showFeedback(`✅ ${data.vencedor} acertou: ${data.resposta}`, "success");
+                    addMessage({ author: "Sistema", text: `✅ ${data.vencedor} acertou!`, type: "success" });
                 } else {
-                    showFeedback(`⏱️ Tempo esgotado. A resposta era: ${data.resposta}`, "warning");
+                    showFeedback(`⏱️ Tempo esgotado!`, "warning");
                 }
-                updateState({ scoreboard: data.placar || [] });
+                updateState({ 
+                    scoreboard: data.placar || [],
+                    revealedAnswer: data.resposta
+                });
                 clearInterval(timerRef.current);
                 break;
             case "match_end":
-                showFeedback(`🏆 ${data.vencedor} venceu a partida com ${data.pontuacao} pontos de ${data.alvo}.`, "success");
+                const top3 = (data.placar || []).slice(0, 3);
                 updateState({
-                    subtitle: "Placares zeram em instantes para uma nova disputa.",
+                    matchResult: { 
+                        winner: data.vencedor, 
+                        score: data.pontuacao, 
+                        target: data.alvo, 
+                        top3,
+                        prontos: data.prontos || 0,
+                        total_jogadores: data.total_jogadores || 0
+                    },
+                    subtitle: "Aguardando jogadores para nova disputa.",
                     scoreboard: data.placar || []
                 });
                 clearInterval(timerRef.current);
+                break;
+            case "match_ready_update":
+                setGameState(prev => {
+                    if (prev.matchResult) {
+                        return { ...prev, matchResult: { ...prev.matchResult, prontos: data.prontos, total_jogadores: data.total_jogadores } };
+                    }
+                    return prev;
+                });
                 break;
             case "scoreboard":
                 updateState({ scoreboard: data.placar || [] });
@@ -112,8 +134,12 @@ export function useGameSocket() {
                     showFeedback(`🔥 ${data.texto}`, "quase");
                 } else if (data.tipo_sys === "dica") {
                     showFeedback(`💡 ${data.texto}`, "warning");
+                } else if (data.tipo_sys === "sucesso") {
+                    addMessage({ author: "Sistema", text: data.texto, type: "success" });
+                    break;
+                } else {
+                    addMessage({ author: "Sistema", text: data.texto, type: "system" });
                 }
-                addMessage({ author: "Sistema", text: data.texto, type: "system" });
                 break;
             case "chat":
                 addMessage({
@@ -172,5 +198,13 @@ export function useGameSocket() {
         return true;
     }, [ws]);
 
-    return { gameState, connect, sendGuess };
+    const sendReady = useCallback(() => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            return false;
+        }
+        ws.send(JSON.stringify({ tipo: "pronto" }));
+        return true;
+    }, [ws]);
+
+    return { gameState, connect, sendGuess, sendReady };
 }

@@ -23,7 +23,7 @@ export function LoginScreen({ onConnect }) {
         <section className="hero-card">
             <div className="hero-copy">
                 <p className="eyebrow">Multiplayer em tempo real</p>
-                <h1>Adivinhe a palavra por emojis</h1>
+                <h1>Advinhe.io</h1>
                 <p className="hero-text">
                     Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera
                 </p>

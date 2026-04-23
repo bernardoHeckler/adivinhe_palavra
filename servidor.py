@@ -40,7 +40,7 @@ def obter_ip_local() -> str:
 
 TEMPO_RODADA = 60
 TEMPO_PROXIMA_RODADA = 4
-PONTOS_ACERTO = 100
+PONTOS_ACERTO = 30
 PONTOS_VITORIA_PARTIDA = 300
 MARCOS_DICA = (20, 40)
 
@@ -57,6 +57,7 @@ class SalaJogo:
         self.reinicio_task: asyncio.Task | None = None
         self.vencedor_rodada: str | None = None
         self.partida_encerrada = False
+        self.jogadores_prontos: set[str] = set()
 
     def adicionar_jogador(self, conexao: "ChatHandler") -> None:
         self.conexoes.add(conexao)
@@ -69,6 +70,7 @@ class SalaJogo:
             self.rodada_atual = None
             self.vencedor_rodada = None
             self.partida_encerrada = False
+            self.jogadores_prontos.clear()
 
     def cancelar_agendamentos(self) -> None:
         for task in (self.timer_task, self.reinicio_task):
@@ -131,6 +133,7 @@ class SalaJogo:
             "desafio": desafio,
             "inicio": time.time(),
             "dicas_enviadas": 0,
+            "acertadores": set()
         }
 
         await self.broadcast(
@@ -176,6 +179,17 @@ class SalaJogo:
                             placar=self.estado_placar(),
                         )
                     )
+                    
+                    vencedor_partida = None
+                    for user, pts in self.pontuacoes.items():
+                        if pts >= PONTOS_VITORIA_PARTIDA:
+                            if not vencedor_partida or pts > self.pontuacoes[vencedor_partida]:
+                                vencedor_partida = user
+                                
+                    if vencedor_partida:
+                        await self.encerrar_partida(vencedor_partida)
+                        return
+
                     self.agendar_proxima_rodada()
                     return
         except asyncio.CancelledError:
@@ -207,29 +221,24 @@ class SalaJogo:
 
         acertou, quase = verificar_palpite(texto, self.rodada_atual["desafio"]["resposta"])
         if acertou:
-            self.vencedor_rodada = conexao.usuario
+            if conexao.usuario in self.rodada_atual.get("acertadores", set()):
+                return
+                
+            self.rodada_atual.setdefault("acertadores", set()).add(conexao.usuario)
             self.pontuacoes[conexao.usuario] = self.pontuacoes.get(conexao.usuario, 0) + PONTOS_ACERTO
-            resposta = self.rodada_atual["desafio"]["resposta"]
-            self.rodada_atual = None
-
-            if self.timer_task and not self.timer_task.done():
-                self.timer_task.cancel()
 
             await self.broadcast(
                 serializar(
-                    MSG_ROUND_END,
-                    motivo="acerto",
-                    vencedor=conexao.usuario,
-                    resposta=resposta,
-                    pontos=PONTOS_ACERTO,
-                    placar=self.estado_placar(),
+                    MSG_SYSTEM,
+                    texto=f"✅ {conexao.usuario} acertou!",
+                    tipo_sys="sucesso"
                 )
             )
             await self.broadcast_placar()
+            
+            # Interrompe a rodada imediatamente se o jogador vencer a partida
             if self.pontuacoes[conexao.usuario] >= PONTOS_VITORIA_PARTIDA:
                 await self.encerrar_partida(conexao.usuario)
-                return
-            self.agendar_proxima_rodada()
             return
 
         if quase:
@@ -251,6 +260,7 @@ class SalaJogo:
     async def encerrar_partida(self, vencedor: str) -> None:
         self.partida_encerrada = True
         self.rodada_atual = None
+        self.jogadores_prontos.clear()
         if self.timer_task and not self.timer_task.done():
             self.timer_task.cancel()
         if self.reinicio_task and not self.reinicio_task.done():
@@ -263,30 +273,47 @@ class SalaJogo:
                 pontuacao=self.pontuacoes.get(vencedor, 0),
                 alvo=PONTOS_VITORIA_PARTIDA,
                 placar=self.estado_placar(),
+                prontos=0,
+                total_jogadores=len(self.conexoes)
             )
         )
-        asyncio.create_task(self._reiniciar_partida())
 
     async def _reiniciar_partida(self) -> None:
-        try:
-            await asyncio.sleep(8)
-            self.pontuacoes = {conexao.usuario: 0 for conexao in self.conexoes}
-            self.rodada_atual = None
-            self.rodada_numero = 0
-            self.vencedor_rodada = None
-            self.partida_encerrada = False
-            await self.broadcast_placar()
-            if self.conexoes:
-                await self.broadcast(
-                    serializar(
-                        MSG_SYSTEM,
-                        texto="Nova partida iniciando.",
-                        tipo_sys="reinicio_partida",
-                    )
+        self.pontuacoes = {conexao.usuario: 0 for conexao in self.conexoes}
+        self.rodada_atual = None
+        self.rodada_numero = 0
+        self.vencedor_rodada = None
+        self.partida_encerrada = False
+        self.jogadores_prontos.clear()
+        await self.broadcast_placar()
+        if self.conexoes:
+            await self.broadcast(
+                serializar(
+                    MSG_SYSTEM,
+                    texto="Nova partida iniciando.",
+                    tipo_sys="reinicio_partida",
                 )
-                await self.iniciar_rodada()
-        except asyncio.CancelledError:
+            )
+            await self.iniciar_rodada()
+
+    async def registrar_pronto(self, conexao: "ChatHandler") -> None:
+        if not self.partida_encerrada:
             return
+        
+        self.jogadores_prontos.add(conexao.usuario)
+        total = len(self.conexoes)
+        prontos = len(self.jogadores_prontos)
+        
+        await self.broadcast(
+            serializar(
+                "match_ready_update",
+                prontos=prontos,
+                total_jogadores=total
+            )
+        )
+        
+        if prontos >= total / 2: # Maioria
+            await self._reiniciar_partida()
 
     async def enviar_estado_inicial(self, conexao: "ChatHandler") -> None:
         await self.enviar(
@@ -372,11 +399,16 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
             log_servidor.error("Erro ao desserializar mensagem: %s", exc)
             return
 
+        tipo = dados.get("tipo", MSG_CHAT)
+        
+        if tipo == "pronto":
+            await self.sala.registrar_pronto(self)
+            return
+
         texto = str(dados.get("texto", "")).strip()
         if not texto:
             return
 
-        tipo = dados.get("tipo", MSG_CHAT)
         if tipo in {MSG_CHAT, MSG_GUESS}:
             await self.sala.processar_palpite(self, texto)
 
