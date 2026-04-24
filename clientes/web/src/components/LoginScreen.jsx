@@ -35,7 +35,7 @@ export function LoginScreen({ onConnect }) {
                     <input 
                         name="usuario" 
                         maxLength="24" 
-                        placeholder="Ex: Bernardo" 
+                        placeholder="Ex: Jogador1" 
                         required 
                         value={username}
                         onChange={e => setUsername(e.target.value)}

@@ -53,7 +53,7 @@ Com ele, é possível observar:
 ### 1. Entrar na pasta do projeto
 
 ```bash
-cd /home/bernardo-linux/Documentos/github/adivinhe_palavra
+cd /caminho/para/adivinhe_palavra
 ```
 
 ### 2. Criar e ativar um ambiente virtual
@@ -116,7 +116,7 @@ Se quiser desenvolver o frontend com recarga automática:
 ### Terminal 1: backend
 
 ```bash
-cd /home/bernardo-linux/Documentos/github/adivinhe_palavra
+cd /caminho/para/adivinhe_palavra
 source .venv/bin/activate
 python3 main.py
 ```
@@ -124,7 +124,7 @@ python3 main.py
 ### Terminal 2: frontend
 
 ```bash
-cd /home/bernardo-linux/Documentos/github/adivinhe_palavra/clientes/web
+cd /caminho/para/adivinhe_palavra/clientes/web
 npm install
 npm run dev
 ```
