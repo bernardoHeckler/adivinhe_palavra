@@ -40,7 +40,8 @@ def obter_ip_local() -> str:
 
 TEMPO_RODADA = 60
 TEMPO_PROXIMA_RODADA = 4
-PONTOS_ACERTO = 30
+PONTOS_POR_COLOCACAO = (30, 20, 15, 10)
+PONTOS_MINIMOS_ACERTO = 5
 PONTOS_VITORIA_PARTIDA = 300
 MARCOS_DICA = (20, 40)
 
@@ -85,6 +86,22 @@ class SalaJogo:
 
     def estado_jogadores(self) -> list[str]:
         return sorted({conexao.usuario for conexao in self.conexoes}, key=str.lower)
+
+    def total_jogadores(self) -> int:
+        return len({conexao.usuario for conexao in self.conexoes})
+
+    def pontos_por_colocacao(self, colocacao: int) -> int:
+        if colocacao <= len(PONTOS_POR_COLOCACAO):
+            return PONTOS_POR_COLOCACAO[colocacao - 1]
+        return PONTOS_MINIMOS_ACERTO
+
+    def obter_vencedor_partida(self) -> str | None:
+        vencedor_partida = None
+        for user, pts in self.pontuacoes.items():
+            if pts >= PONTOS_VITORIA_PARTIDA:
+                if not vencedor_partida or pts > self.pontuacoes[vencedor_partida]:
+                    vencedor_partida = user
+        return vencedor_partida
 
     def proximo_desafio(self) -> dict:
         disponiveis = [desafio for desafio in DESAFIOS if desafio not in self.desafios_usados]
@@ -133,7 +150,8 @@ class SalaJogo:
             "desafio": desafio,
             "inicio": time.time(),
             "dicas_enviadas": 0,
-            "acertadores": set()
+            "acertadores": set(),
+            "ordem_acertos": [],
         }
 
         await self.broadcast(
@@ -179,13 +197,8 @@ class SalaJogo:
                             placar=self.estado_placar(),
                         )
                     )
-                    
-                    vencedor_partida = None
-                    for user, pts in self.pontuacoes.items():
-                        if pts >= PONTOS_VITORIA_PARTIDA:
-                            if not vencedor_partida or pts > self.pontuacoes[vencedor_partida]:
-                                vencedor_partida = user
-                                
+
+                    vencedor_partida = self.obter_vencedor_partida()
                     if vencedor_partida:
                         await self.encerrar_partida(vencedor_partida)
                         return
@@ -223,22 +236,43 @@ class SalaJogo:
         if acertou:
             if conexao.usuario in self.rodada_atual.get("acertadores", set()):
                 return
-                
+
             self.rodada_atual.setdefault("acertadores", set()).add(conexao.usuario)
-            self.pontuacoes[conexao.usuario] = self.pontuacoes.get(conexao.usuario, 0) + PONTOS_ACERTO
+            ordem_acertos = self.rodada_atual.setdefault("ordem_acertos", [])
+            ordem_acertos.append(conexao.usuario)
+            colocacao = len(ordem_acertos)
+            pontos_ganhos = self.pontos_por_colocacao(colocacao)
+            self.pontuacoes[conexao.usuario] = self.pontuacoes.get(conexao.usuario, 0) + pontos_ganhos
 
             await self.broadcast(
                 serializar(
                     MSG_SYSTEM,
-                    texto=f"✅ {conexao.usuario} acertou!",
+                    texto=f"✅ {conexao.usuario} acertou em {colocacao}º lugar e ganhou {pontos_ganhos} pontos!",
                     tipo_sys="sucesso"
                 )
             )
             await self.broadcast_placar()
-            
-            # Interrompe a rodada imediatamente se o jogador vencer a partida
-            if self.pontuacoes[conexao.usuario] >= PONTOS_VITORIA_PARTIDA:
-                await self.encerrar_partida(conexao.usuario)
+
+            if self.total_jogadores() == 1:
+                resposta = self.rodada_atual["desafio"]["resposta"]
+                self.rodada_atual = None
+                await self.broadcast(
+                    serializar(
+                        MSG_ROUND_END,
+                        motivo="acerto",
+                        vencedor=conexao.usuario,
+                        resposta=resposta,
+                        placar=self.estado_placar(),
+                    )
+                )
+
+                if self.pontuacoes[conexao.usuario] >= PONTOS_VITORIA_PARTIDA:
+                    await self.encerrar_partida(conexao.usuario)
+                    return
+
+                self.agendar_proxima_rodada()
+                return
+
             return
 
         if quase:
