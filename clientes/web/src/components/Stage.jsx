@@ -51,21 +51,19 @@ export function Stage({
                 {feedback ? feedback.text : ""}
             </div>
 
-            <div className="chat-stack">
-                <Chat messages={messages} />
-
-                <div className={`guess-box ${shakeGuess ? "shake" : ""}`}>
-                    <form onSubmit={handleGuess} className="guess-form">
-                        <input
-                            value={guess}
-                            onChange={e => setGuess(e.target.value)}
-                            autoComplete="off"
-                            placeholder="Digite seu palpite ou converse com a sala"
-                        />
-                        <button type="submit">Enviar</button>
-                    </form>
-                </div>
+            <div className={`guess-box ${shakeGuess ? "shake" : ""}`}>
+                <form onSubmit={handleGuess} className="guess-form">
+                    <input 
+                        value={guess}
+                        onChange={e => setGuess(e.target.value)}
+                        autoComplete="off"
+                        placeholder="Digite seu palpite ou converse com a sala"
+                    />
+                    <button type="submit">Enviar</button>
+                </form>
             </div>
+
+            <Chat messages={messages} />
         </section>
     );
 }

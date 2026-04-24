@@ -156,7 +156,7 @@ export function useGameSocket() {
     const connect = useCallback((room, username) => {
         return new Promise((resolve, reject) => {
             const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const host = window.location.port === "5173" ? "localhost:8080" : window.location.host;
+            const host = window.location.port === "5173" ? "localhost:8081" : window.location.host;
             
             const params = new URLSearchParams({ sala: room, usuario: username });
             const socket = new WebSocket(`${protocol}://${host}/chat/ws?${params.toString()}`);

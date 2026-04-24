@@ -9,14 +9,14 @@ export function QRCodeInvite({ ipServidor, room }) {
 
     return (
         <div className="hero-qrcode-container">
-            <p className="eyebrow" style={{margin: 0}}>Convide seus amigos</p>
+            <p className="eyebrow" style={{ margin: 0 }}>Convide seus amigos</p>
             <div className="hero-qrcode-box" style={{ display: 'flex' }}>
-                <QRCodeSVG 
-                    value={url} 
-                    size={120} 
-                    bgColor={"#ffffff"} 
-                    fgColor={"#0f172a"} 
-                    level={"L"} 
+                <QRCodeSVG
+                    value={url}
+                    size={150}
+                    bgColor={"#ffffff"}
+                    fgColor={"#0f172a"}
+                    level={"L"}
                 />
             </div>
         </div>

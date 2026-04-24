@@ -23,7 +23,7 @@ export function LoginScreen({ onConnect }) {
         <section className="hero-card">
             <div className="hero-copy">
                 <p className="eyebrow">Multiplayer em tempo real</p>
-                <h1>Advinhe.io</h1>
+                <h1 data-text="Adivinhe.io">Adivinhe.io</h1>
                 <p className="hero-text">
                     Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera
                 </p>
@@ -32,21 +32,21 @@ export function LoginScreen({ onConnect }) {
             <form onSubmit={handleSubmit} className="login-card">
                 <label>
                     <span>Seu nome</span>
-                    <input 
-                        name="usuario" 
-                        maxLength="24" 
-                        placeholder="Ex: Jogador1" 
-                        required 
+                    <input
+                        name="usuario"
+                        maxLength="24"
+                        placeholder="Escolha seu nome"
+                        required
                         value={username}
                         onChange={e => setUsername(e.target.value)}
                     />
                 </label>
                 <label>
                     <span>Sala</span>
-                    <input 
-                        name="sala" 
-                        maxLength="24" 
-                        placeholder="Ex: amigos" 
+                    <input
+                        name="sala"
+                        maxLength="24"
+                        placeholder="Escolha o nome da sala"
                         value={room}
                         onChange={e => setRoom(e.target.value)}
                     />

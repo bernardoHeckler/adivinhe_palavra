@@ -20,13 +20,13 @@ export function GameScreen({ gameState, sendGuess, sendReady }) {
     return (
         <main className="game-layout">
             <aside className="sidebar left-sidebar">
-                <Scoreboard 
-                    players={gameState.players} 
-                    scoreboard={gameState.scoreboard} 
+                <Scoreboard
+                    players={gameState.players}
+                    scoreboard={gameState.scoreboard}
                 />
             </aside>
 
-            <Stage 
+            <Stage
                 room={gameState.room}
                 roundNumber={gameState.roundNumber}
                 timer={gameState.timer}
@@ -43,16 +43,16 @@ export function GameScreen({ gameState, sendGuess, sendReady }) {
             <aside className="sidebar right-sidebar">
                 <div className="hero-copy" style={{ padding: 0 }}>
                     <p className="eyebrow">Multiplayer em tempo real</p>
-                    <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)' }}>Advinhe.io</h1>
+                    <h1 data-text="Adivinhe.io" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)' }}>Adivinhe.io</h1>
                     <p className="hero-text" style={{ fontSize: '0.9rem' }}>
                         Entre em uma sala, receba um desafio em emojis e tente acertar antes da galera
                     </p>
                 </div>
-                
+
                 {gameState.ipServidor && gameState.room && (
-                    <QRCodeInvite 
-                        ipServidor={gameState.ipServidor} 
-                        room={gameState.room} 
+                    <QRCodeInvite
+                        ipServidor={gameState.ipServidor}
+                        room={gameState.room}
                     />
                 )}
             </aside>
@@ -62,7 +62,7 @@ export function GameScreen({ gameState, sendGuess, sendReady }) {
                     <div className="modal-content">
                         <h2>🎉 Partida Encerrada!</h2>
                         <p className="winner-text"><strong>{gameState.matchResult.winner}</strong> atingiu a meta de {gameState.matchResult.target} pontos.</p>
-                        
+
                         <div className="top3-list">
                             <h3>Top 3 Jogadores:</h3>
                             {gameState.matchResult.top3.map((p, i) => (
@@ -72,10 +72,10 @@ export function GameScreen({ gameState, sendGuess, sendReady }) {
                                 </div>
                             ))}
                         </div>
-                        
+
                         <div style={{ marginTop: '20px' }}>
-                            <button 
-                                onClick={handleReady} 
+                            <button
+                                onClick={handleReady}
                                 disabled={isReady}
                                 className="ready-btn"
                             >

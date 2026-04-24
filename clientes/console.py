@@ -1,6 +1,5 @@
 import asyncio
 import json
-import inspect
 from logging import Logger
 
 from tornado.websocket import WebSocketClientConnection, websocket_connect
@@ -9,12 +8,6 @@ from logger import configurar_logger, obter_logger
 from protocolo import ChatMessage, desserializar
 
 log_cliente: Logger = obter_logger("Cliente")
-
-
-async def fechar_conexao(conexao: WebSocketClientConnection) -> None:
-    resultado = conexao.close()
-    if inspect.isawaitable(resultado):
-        await resultado
 
 
 async def receber_mensagens(conexao: WebSocketClientConnection) -> None:
@@ -53,12 +46,12 @@ async def ler_terminal(conexao: WebSocketClientConnection) -> None:
         try:
             texto: str = await asyncio.to_thread(input, "> ")
             if texto.lower() == "sair":
-                await fechar_conexao(conexao)
+                conexao.close()
                 break
             if texto.strip():
                 await conexao.write_message(json.dumps({"tipo": "guess", "texto": texto}, ensure_ascii=False))
         except EOFError:
-            await fechar_conexao(conexao)
+            conexao.close()
             break
         except Exception as e:
             log_cliente.error(f"Erro no terminal do cliente: {e}")
