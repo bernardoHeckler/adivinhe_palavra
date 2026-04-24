@@ -1,85 +1,167 @@
-# WebSocket Chat (Tornado Assíncrono)
+# Adivinhe a Palavra com Emojis
 
-A mesma base didática do chat interativo, mas agora utilizando o protocolo **WebSocket** em conjunto com o framework de alta performance **Tornado**! 
+Projeto acadêmico de um jogo multiplayer em tempo real feito para estudar comunicação cliente-servidor com WebSocket.
 
-Ele introduz o modelo de **Duplex Completo (Assíncrono)**; o que significa que diferentemente do modelo sequencial travado, **ninguém precisa aguardar pela resposta do outro**. O recebimento de rede e o console local rodam paralelamente sem bloqueios.
-Por ser um sistema em tempo real puro, o servidor não armazena mensagens: elas são apenas transmitidas entre os clientes conectados naquele momento.
-Além disso, o sistema agora suporta **múltiplas salas de chat simultâneas**, permitindo que diferentes grupos de usuários se comuniquem de forma isolada dentro da mesma aplicação.
+A proposta do projeto é usar uma dinâmica simples de adivinhação por emojis para praticar conceitos como:
 
-## 📌 Arquitetura
+- conexão persistente entre cliente e servidor
+- troca de mensagens em tempo real
+- gerenciamento de salas
+- sincronização de estado entre múltiplos jogadores
+- atualização de interface a partir de eventos do backend
 
-O chat agora é gerido num formato orientado a eventos no clássico Loop (`IOLoop`):
-- O **Tornado Web** (`tornado.web.Application`) instanciou um *Handler* persistente (`/chat`) na especificação WebSocket.
-- O Terminal do servidor e do cliente rodam uma *coroutine* poderosa (`asyncio.to_thread`) que lê o teclado simultaneamente à placa de rede.
-- O payload de protocolo agora codifica os bytes numa `String` limpa em memória ao invés de bytes transientes.
-- O servidor mantém um gerenciamento em memória das conexões organizadas por sala (`dict[sala] = conexões`), garantindo o isolamento das mensagens.
+## Objetivo acadêmico
 
-## 📂 Estrutura de Arquivos
+Mais do que apenas entregar um jogo, este projeto foi construído para apoiar o aprendizado de WebSockets em um contexto prático.
 
-* **`servidor.py`**: O arquivo de backend na raiz que Roda o servidor WebSocket Tornado.
-* **`clientes/console.py`**: O cliente Python Terminal em si usando `websocket_connect()`.
-* **`clientes/web/`**: A bela Interface Gráfica Glassmorphism provida pelo próprio Tornado no Root URL.
-* **`main.py`**: Arquivo responsável por inicializar a aplicação Tornado e configurar as rotas.
-* **`protocolo.py`**: Define a estrutura das mensagens e sua serialização/desserialização.
+Com ele, é possível observar:
 
-## 🚀 Como Executar
+- como o servidor mantém conexões abertas com vários clientes ao mesmo tempo
+- como eventos de jogo são enviados em tempo real para todos os jogadores da sala
+- como o backend controla rodadas, pontuação e reinício de partidas
+- como o frontend React reage às mensagens recebidas pelo socket
 
-### 1. Instale o Tornado
-Se ainda não possuir, instale o único requerimento mapeado no ecossistema atual:
+## Como o jogo funciona
+
+- cada sala possui seu próprio estado
+- o servidor escolhe um desafio com emojis e categoria
+- os jogadores enviam palpites pelo chat em tempo real
+- em sala com 1 jogador, acertou e a próxima rodada começa logo depois
+- em sala com 2 ou mais jogadores, a rodada continua até o tempo acabar
+- a pontuação depende da ordem de acerto na rodada
+- a partida termina quando alguém atinge `300` pontos
+
+## Stack utilizada
+
+- Python
+- Tornado
+- WebSocket
+- React
+- Vite
+
+## Estrutura principal
+
+- `main.py`: inicia o servidor Tornado e publica o frontend buildado
+- `servidor.py`: controla salas, rodadas, regras de pontuação e WebSocket
+- `protocolo.py`: define serialização das mensagens e validação dos palpites
+- `clientes/web/`: frontend React do jogo
+- `clientes/console.py`: cliente simples de terminal para testes
+- `tests/`: testes automatizados
+
+## Passo a passo para rodar o projeto
+
+### 1. Entrar na pasta do projeto
+
+```bash
+cd /home/bernardo-linux/Documentos/github/adivinhe_palavra
+```
+
+### 2. Criar e ativar um ambiente virtual
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Instalar dependências do backend
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Inicie o Servidor e o Client
-Com a nova arquitetura de pacotes e a presença do `__init__.py`, executamos a partir da raiz do repositório garantindo que as bibliotecas cruzem de forma correta (`-m`).
+### 4. Instalar dependências do frontend
 
-**Terminal 1:**
 ```bash
-python main.py
-```
-**Terminal 2:** Abra o navegador em `http://localhost:8080/` OU execute a CLI local:
-```bash
-python -m clientes.console
+cd clientes/web
+npm install
 ```
 
-### 3. Após abrir o navegador
-Você pode acessar salas diferentes diretamente pela URL:
+### 5. Gerar o build do frontend
 
-`http://localhost:8080/?sala=abc`
+O servidor Python serve os arquivos estáticos a partir de `clientes/web/dist`, então esse build precisa existir antes da execução.
 
-Caso nenhum parâmetro seja informado, o sistema conecta automaticamente na sala `default`.
-
-## 💬 Funcionamento das Salas
-
-Cada conexão WebSocket é associada a uma sala através de um parâmetro de query (`?sala=nome`).
-
-- Usuários na mesma sala recebem mensagens entre si
-- Usuários em salas diferentes são totalmente isolados
-- As salas são criadas dinamicamente conforme a conexão dos clientes
-
-> ⚠️ O endpoint `/chat/ws` é exclusivo para WebSocket e não deve ser acessado diretamente pelo navegador
-
-## 🧪 Validando a Qualidade (Testes)
-
-O framework de testes está suportado via `pytest` com Mocks de terminal de rede. O sistema cobre todos os eventos base (Conexão, Decodificação e Mensageria Assíncrona).
-
-Para executa-los localmente:
 ```bash
-pip install pytest pytest-cov pytest-asyncio
-pytest tests/ --cov=backend --cov=clientes.console
+npm run build
+cd ../..
 ```
 
-## ⚠️ Observações
+### 6. Iniciar o servidor
 
-- As salas são mantidas em memória (não persistem após reinício do servidor)
-- As mensagens não são armazenadas (não existe histórico de chat)
-- O sistema não possui autenticação (qualquer usuário pode entrar em qualquer sala)
-- O chat funciona apenas em tempo real (as mensagens existem apenas durante a conexão ativa)
+```bash
+python3 main.py
+```
 
-*A GitHub Action implementada atestará o Deploy Continuamente após cada envio `Push` pro main.*
+Se aparecer `OSError: [Errno 98] Address already in use`, a porta `8080` já está ocupada. Para liberar:
 
-## 🚧 Melhorias Futuras
+```bash
+fuser -k 8080/tcp
+```
 
-- Persistência de mensagens (histórico de chat)
-- Autenticação de usuários
-- Escalabilidade com Redis
+### 7. Abrir no navegador
+
+```text
+http://localhost:8080/
+```
+
+Para entrar direto em uma sala específica:
+
+```text
+http://localhost:8080/?sala=amigos
+```
+
+## Passo a passo para desenvolvimento
+
+Se quiser desenvolver o frontend com recarga automática:
+
+### Terminal 1: backend
+
+```bash
+cd /home/bernardo-linux/Documentos/github/adivinhe_palavra
+source .venv/bin/activate
+python3 main.py
+```
+
+### Terminal 2: frontend
+
+```bash
+cd /home/bernardo-linux/Documentos/github/adivinhe_palavra/clientes/web
+npm install
+npm run dev
+```
+
+O Vite sobe em:
+
+```text
+http://localhost:5173/
+```
+
+Nesse modo, o frontend se conecta automaticamente ao backend em `localhost:8080`.
+
+## Regras atuais da partida
+
+- tempo por rodada: `60` segundos
+- intervalo entre rodadas: `4` segundos
+- pontuação por ordem de acerto: `30`, `20`, `15`, `10` e depois `5`
+- meta para vencer a partida: `300` pontos
+- salas e pontuações ficam somente em memória
+
+## Testes
+
+Para rodar os testes automatizados:
+
+```bash
+pytest
+```
+
+Ou apenas os testes do servidor:
+
+```bash
+pytest tests/test_servidor.py
+```
+
+## Observações
+
+- o servidor principal roda na porta `8080`
+- o frontend usa `vite@5`, compatível com `Node 18`
+- o build do frontend precisa existir para o Tornado servir a interface final
+- como as salas ficam em memória, tudo é perdido ao reiniciar o servidor
