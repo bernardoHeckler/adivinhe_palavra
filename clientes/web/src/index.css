@@ -37,6 +37,11 @@ body {
     gap: 24px;
 }
 
+.login-shell {
+    min-height: calc(100vh - 48px);
+    align-items: center;
+}
+
 .hero-card,
 .panel,
 .stage-card,
@@ -49,19 +54,21 @@ body {
 
 .hero-card {
     border-radius: 32px;
-    padding: 28px;
+    padding: 32px;
     display: grid;
-    grid-template-columns: 1.3fr 0.9fr;
-    gap: 24px;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 430px);
+    gap: 32px;
+    align-items: center;
+    min-height: min(720px, calc(100vh - 48px));
 }
 
 .hero-copy {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 12px;
-    padding: 8px 4px;
+    gap: 16px;
+    padding: 24px 8px 24px 0;
+    max-width: 560px;
 }
 
 .eyebrow {
@@ -86,16 +93,19 @@ body {
 
 .hero-text {
     color: var(--muted);
-    font-size: 1.05rem;
-    max-width: 58ch;
+    font-size: 1.12rem;
+    line-height: 1.55;
+    max-width: 34ch;
 }
 
 .login-card {
     border-radius: 28px;
-    padding: 22px;
+    padding: 28px;
     display: grid;
-    gap: 16px;
+    gap: 18px;
     background: var(--card-strong);
+    align-content: center;
+    min-height: 100%;
 }
 
 .hero-qrcode-container {
@@ -194,8 +204,10 @@ button {
     padding: 26px;
     min-height: 620px;
     display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
     align-content: start;
     gap: 24px;
+    min-height: 0;
 }
 
 .stage-topbar,
@@ -295,10 +307,19 @@ button {
     grid-template-columns: 1fr auto;
 }
 
+.chat-stack {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 14px;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .sidebar {
     display: grid;
     gap: 24px;
     align-content: start;
+    min-height: 0;
 }
 
 .panel {
@@ -374,23 +395,33 @@ button {
 }
 
 .chat-minimal {
-    margin-top: 16px;
-    border-top: 1px solid var(--line);
-    padding-top: 16px;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(15, 23, 42, 0.46);
+    border: 1px solid var(--line);
+    min-height: 0;
+    overflow: hidden;
 }
 
 .minimal-messages {
-    max-height: 180px;
+    min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
     font-size: 0.95rem;
+    padding-right: 4px;
 }
 
 .message-minimal {
-    padding: 2px 0;
-    line-height: 1.4;
+    padding: 10px 12px;
+    line-height: 1.45;
+    border-radius: 16px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .message-minimal .time-meta {
@@ -409,6 +440,7 @@ button {
 
 .message-minimal.self {
     color: var(--text);
+    border-color: rgba(251, 113, 133, 0.2);
 }
 
 .message-minimal.other {
@@ -442,11 +474,62 @@ button {
     }
 }
 
+@media (min-width: 921px) {
+    html,
+    body {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .page-shell {
+        height: calc(100vh - 48px);
+        margin: 24px auto;
+    }
+
+    .game-layout {
+        height: 100%;
+        min-height: 0;
+        align-items: stretch;
+    }
+
+    .stage-card,
+    .sidebar {
+        height: 100%;
+    }
+
+    .stage-card {
+        overflow: hidden;
+    }
+
+    .chat-minimal {
+        height: 100%;
+    }
+
+    .minimal-messages {
+        max-height: none;
+    }
+}
+
 @media (max-width: 920px) {
 
     .hero-card,
     .game-layout {
         grid-template-columns: 1fr;
+    }
+
+    .login-shell {
+        min-height: auto;
+        align-items: stretch;
+    }
+
+    .hero-card {
+        min-height: auto;
+        gap: 24px;
+    }
+
+    .hero-copy {
+        max-width: none;
+        padding: 4px 0;
     }
 
     .stage-card {
@@ -455,6 +538,10 @@ button {
 }
 
 @media (max-width: 640px) {
+    body {
+        min-height: 100dvh;
+    }
+
     .page-shell {
         width: min(100% - 20px, 100%);
         margin: 10px auto 24px;
@@ -470,6 +557,42 @@ button {
 
     .guess-form {
         grid-template-columns: 1fr;
+    }
+
+    .stage-card {
+        min-height: auto;
+        gap: 18px;
+    }
+
+    .emoji-stage {
+        min-height: 260px;
+        padding: 22px 18px;
+    }
+
+    .chat-stack {
+        gap: 12px;
+    }
+
+    .chat-minimal {
+        padding: 14px;
+    }
+
+    .minimal-messages {
+        min-height: 160px;
+        max-height: min(34vh, 260px);
+    }
+
+    .guess-box {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        padding-top: 4px;
+        background: linear-gradient(180deg, rgba(17, 24, 39, 0), rgba(17, 24, 39, 0.92) 35%);
+    }
+
+    .guess-form button,
+    .guess-form input {
+        min-height: 52px;
     }
 }
 

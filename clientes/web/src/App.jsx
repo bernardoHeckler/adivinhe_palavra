@@ -17,7 +17,7 @@ export default function App() {
     };
 
     return (
-        <div className="page-shell">
+        <div className={`page-shell ${inGame ? "in-game-shell" : "login-shell"}`}>
             {!inGame ? (
                 <LoginScreen onConnect={handleConnect} />
             ) : (
