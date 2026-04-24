@@ -30,7 +30,7 @@ def make_app() -> Application:
 
 def iniciar_servidor() -> None:
     app = make_app()
-    porta = 8081
+    porta = 8080
     app.listen(porta)
     log_servidor.info("Servidor iniciado em http://localhost:%s", porta)
     log_servidor.info("WebSocket disponível em ws://localhost:%s/chat/ws", porta)
